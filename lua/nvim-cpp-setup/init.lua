@@ -36,51 +36,49 @@ function M.setup(user_config)
 			local screen_width = vim.o.columns
 			local screen_height = vim.o.lines
 
+			-- Calculate dimensions
+			local code_width = math.floor(screen_width * config.layout.code.width_percent)
+			local io_width = math.floor(screen_width * config.layout.io_panel.width_percent)
+			local io_height = math.floor(screen_height * config.layout.io_panel.height_percent)
+			local io_col = code_width
+
 			-- Main code window (left 80%)
 			local code_win = vim.api.nvim_get_current_win()
 			vim.api.nvim_win_set_config(code_win, {
 				relative = "editor",
-				width = math.floor(screen_width * config.layout.code.width_percent),
+				width = code_width,
 				height = screen_height,
 				row = 0,
 				col = 0,
 				focusable = true,
 			})
 
-			-- Calculate IO panel dimensions
-			local io_width = math.floor(screen_width * config.layout.io_panel.width_percent)
-			local io_height = math.floor(screen_height * config.layout.io_panel.height_percent)
-			local io_col = math.floor(screen_width * config.layout.io_panel.col)
-
 			-- Input window (top half of IO panel)
-			vim.cmd("vsplit") -- Split vertically to the right
-			vim.cmd("wincmd l") -- Move to the new window
-			vim.cmd("edit " .. config.filenames.input)
+			vim.cmd("vnew") -- Open a new vertical split to the right
 			local input_win = vim.api.nvim_get_current_win()
+			vim.cmd("edit " .. config.filenames.input)
 			vim.api.nvim_win_set_config(input_win, {
 				relative = "editor",
 				width = io_width,
-				height = math.floor(io_height / 2), -- Exactly half height
+				height = math.floor(io_height / 2),
 				row = 0,
 				col = io_col,
 				focusable = true,
 			})
+			vim.api.nvim_buf_set_option(vim.api.nvim_win_get_buf(input_win), "filetype", "text")
 
 			-- Output window (bottom half of IO panel)
-			vim.cmd("split") -- Split horizontally below the current window (input)
-			vim.cmd("edit " .. config.filenames.output)
+			vim.cmd("s") -- Open a new horizontal split below the current window (input)
 			local output_win = vim.api.nvim_get_current_win()
+			vim.cmd("edit " .. config.filenames.output)
 			vim.api.nvim_win_set_config(output_win, {
 				relative = "editor",
 				width = io_width,
-				height = math.floor(io_height / 2), -- Exactly half height
-				row = math.floor(io_height / 2), -- Starts right below input
+				height = math.floor(io_height / 2),
+				row = math.floor(io_height / 2),
 				col = io_col,
 				focusable = true,
 			})
-
-			-- Configure buffers
-			vim.api.nvim_buf_set_option(vim.api.nvim_win_get_buf(input_win), "filetype", "text")
 			vim.api.nvim_buf_set_option(vim.api.nvim_win_get_buf(output_win), "filetype", "text")
 
 			-- Return focus to code window
