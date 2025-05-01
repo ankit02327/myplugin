@@ -9,17 +9,11 @@ local default_config = {
 			row = 0, -- Top edge
 			col = 0, -- Left edge
 		},
-		input = {
+		io_panel = {
 			width_percent = 0.2, -- 20% width
-			height_percent = 0.1, -- 10% height
+			height_percent = 0.2, -- 20% total height (10% input + 10% output)
 			row = 0, -- Top edge
 			col = 0.8, -- Starts at 80% from left
-		},
-		output = {
-			width_percent = 0.2, -- 20% width
-			height_percent = 0.1, -- 10% height
-			row = 0.1, -- 10% from top
-			col = 0.8, -- Same column as input
 		},
 	},
 	filenames = {
@@ -42,51 +36,46 @@ function M.setup(user_config)
 			local screen_width = vim.o.columns
 			local screen_height = vim.o.lines
 
-			-- Calculate absolute pixel dimensions
-			local function calc_dimensions(spec)
-				return {
-					width = math.floor(screen_width * spec.width_percent),
-					height = math.floor(screen_height * spec.height_percent),
-					row = math.floor(screen_height * spec.row),
-					col = math.floor(screen_width * spec.col),
-				}
-			end
-
 			-- Main code window (left 80%)
 			local code_win = vim.api.nvim_get_current_win()
-			local code_dims = calc_dimensions(config.layout.code)
 			vim.api.nvim_win_set_config(code_win, {
 				relative = "editor",
-				width = code_dims.width,
-				height = code_dims.height,
-				row = code_dims.row,
-				col = code_dims.col,
+				width = math.floor(screen_width * config.layout.code.width_percent),
+				height = screen_height,
+				row = 0,
+				col = 0,
 				focusable = true,
 			})
 
-			-- Input window (top-right)
+			-- Calculate IO panel dimensions
+			local io_width = math.floor(screen_width * config.layout.io_panel.width_percent)
+			local io_height = math.floor(screen_height * config.layout.io_panel.height_percent)
+			local io_col = math.floor(screen_width * config.layout.io_panel.col)
+
+			-- Input window (top half of IO panel)
+			vim.cmd("vsplit") -- Split vertically to the right
+			vim.cmd("wincmd l") -- Move to the new window
 			vim.cmd("edit " .. config.filenames.input)
 			local input_win = vim.api.nvim_get_current_win()
-			local input_dims = calc_dimensions(config.layout.input)
 			vim.api.nvim_win_set_config(input_win, {
 				relative = "editor",
-				width = input_dims.width,
-				height = input_dims.height,
-				row = input_dims.row,
-				col = input_dims.col,
+				width = io_width,
+				height = math.floor(io_height / 2), -- Exactly half height
+				row = 0,
+				col = io_col,
 				focusable = true,
 			})
 
-			-- Output window (bottom-right)
+			-- Output window (bottom half of IO panel)
+			vim.cmd("split") -- Split horizontally below the current window (input)
 			vim.cmd("edit " .. config.filenames.output)
 			local output_win = vim.api.nvim_get_current_win()
-			local output_dims = calc_dimensions(config.layout.output)
 			vim.api.nvim_win_set_config(output_win, {
 				relative = "editor",
-				width = output_dims.width,
-				height = output_dims.height,
-				row = output_dims.row,
-				col = output_dims.col,
+				width = io_width,
+				height = math.floor(io_height / 2), -- Exactly half height
+				row = math.floor(io_height / 2), -- Starts right below input
+				col = io_col,
 				focusable = true,
 			})
 
@@ -99,7 +88,7 @@ function M.setup(user_config)
 		end,
 	})
 
-	-- F5 Compilation keybinding
+	-- F5 Compilation keybinding (unchanged)
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "cpp",
 		callback = function()
@@ -112,13 +101,13 @@ function M.setup(user_config)
 					:gsub("{input}", input_path)
 					:gsub("{output}", output_path)
 
-				vim.cmd("wa") -- Save all files
+				vim.cmd("wa")
 				local success, _ = pcall(vim.cmd, "silent !" .. cmd)
 				if not success then
 					vim.notify("Compilation failed!", vim.log.levels.ERROR)
 				end
-				vim.cmd("e " .. output_path) -- Refresh output
-				vim.cmd("wincmd h") -- Return to code window
+				vim.cmd("e " .. output_path)
+				vim.cmd("wincmd h")
 			end, { buffer = true })
 		end,
 	})
