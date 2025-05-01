@@ -1,14 +1,13 @@
-# myplugin
+# Neovim C++ Setup
 
-A minimal Neovim plugin to demonstrate a custom plugin setup.
+This plugin configures Neovim for C++ programming. When you open a `.cpp` file, it sets up a layout with the code area and input/output file splits.
 
-## Installation (with lazy.nvim)
+## Installation
+
+Use your plugin manager to install:
 
 ```lua
-{
-  "ankit02327/myplugin",
-  config = function()
-    require("myplugin").setup()
-  end,
+require("lazy").setup {
+  { "ankit02327/neovim-cpp-setup" }
 }
 ```
