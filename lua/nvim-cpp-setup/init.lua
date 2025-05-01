@@ -7,58 +7,54 @@ local default_config = {
 	input_filename = "input.txt",
 	output_filename = "output.txt",
 	compile_command = "g++ % -o %< && ./%< < %s > %s",
-	-- % = current file, %< = filename without extension
-	-- first %s = input file, second %s = output file
 }
 
 function M.setup(user_config)
 	-- Merge user config with defaults
 	local config = vim.tbl_deep_extend("force", default_config, user_config or {})
 
-	-- Calculate window sizes based on current screen size
-	local function setup_windows()
-		if vim.bo.buftype ~= "" or vim.bo.filetype ~= "cpp" then
-			return
-		end
-
-		local width = vim.o.columns
-		local height = vim.o.lines
-		local code_width = math.floor(width * config.code_width_percent)
-		local io_width = width - code_width
-
-		-- Save current window
-		local cpp_win = vim.api.nvim_get_current_win()
-
-		-- Create vertical split for IO panel
-		vim.cmd("vsplit")
-		local io_win = vim.api.nvim_get_current_win()
-		vim.api.nvim_win_set_width(io_win, io_width)
-
-		-- Create horizontal split in IO panel
-		vim.cmd("split")
-		local input_win = vim.api.nvim_get_current_win()
-		local output_win = vim.api.nvim_get_win_by_id(io_win)
-
-		-- Resize IO windows
-		local io_height = math.floor(height * config.io_height_percent)
-		vim.api.nvim_win_set_height(input_win, io_height)
-
-		-- Open files
-		vim.api.nvim_win_set_buf(input_win, vim.fn.bufadd(config.input_filename))
-		vim.api.nvim_win_set_buf(output_win, vim.fn.bufadd(config.output_filename))
-
-		-- Set filetypes
-		vim.api.nvim_buf_set_option(vim.api.nvim_win_get_buf(input_win), "filetype", "text")
-		vim.api.nvim_buf_set_option(vim.api.nvim_win_get_buf(output_win), "filetype", "text")
-
-		-- Return to code window
-		vim.api.nvim_set_current_win(cpp_win)
-	end
-
 	-- Setup autocmd for layout
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "cpp",
-		callback = setup_windows,
+		callback = function()
+			if vim.bo.buftype ~= "" or vim.bo.filetype ~= "cpp" then
+				return
+			end
+
+			local width = vim.o.columns
+			local height = vim.o.lines
+			local code_width = math.floor(width * config.code_width_percent)
+			local io_width = width - code_width
+
+			-- Save current window (cpp file)
+			local cpp_win = vim.api.nvim_get_current_win()
+
+			-- Create vertical split for IO panel
+			vim.cmd("vsplit")
+			local io_win = vim.api.nvim_get_current_win()
+			vim.api.nvim_win_set_width(io_win, io_width)
+
+			-- Create horizontal split in IO panel (input.txt)
+			vim.cmd("split " .. config.input_filename)
+			local input_win = vim.api.nvim_get_current_win()
+			local input_buf = vim.api.nvim_win_get_buf(input_win)
+
+			-- Create output window (output.txt)
+			vim.cmd("split " .. config.output_filename)
+			local output_win = vim.api.nvim_get_current_win()
+			local output_buf = vim.api.nvim_win_get_buf(output_win)
+
+			-- Resize windows
+			local io_height = math.floor(height * config.io_height_percent)
+			vim.api.nvim_win_set_height(input_win, io_height)
+
+			-- Set filetypes
+			vim.api.nvim_buf_set_option(input_buf, "filetype", "text")
+			vim.api.nvim_buf_set_option(output_buf, "filetype", "text")
+
+			-- Return to code window
+			vim.api.nvim_set_current_win(cpp_win)
+		end,
 	})
 
 	-- Setup F5 keybinding
