@@ -1,9 +1,19 @@
----
+### Fixed `LICENSE`
+Make sure to replace "YOUR NAME" with your actual name or GitHub username.
 
-### 📄 `LICENSE` (MIT):
-```text
-MIT License
+## Key Improvements
 
-Copyright (c) 2025 YOUR NAME
+1. **Better Autocmd**: Changed from `BufReadPost` to `FileType` which is more reliable for this use case.
+2. **Configurable Options**: Added customizable window sizes and filenames.
+3. **Error Prevention**: Added checks for buffer types to avoid issues in special buffers.
+4. **Proper Window Management**: More robust window handling using Neovim API.
+5. **Automatic Setup**: The plugin now works immediately when required.
+6. **Complete Documentation**: README now explains all features and configuration options.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy...
+To test the plugin:
+1. Make these changes to your files
+2. Commit and push to GitHub
+3. Install in Neovim using your plugin manager
+4. Open a .cpp file to see the layout automatically created
+
+The plugin should now work reliably when opening C++ files, creating a three-pane layout with your code, input, and output buffers.
