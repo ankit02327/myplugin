@@ -2,11 +2,11 @@ local M = {}
 
 -- Default configuration
 local default_config = {
-	code_width_percent = 0.8, -- 80% for code
-	io_height_percent = 0.5, -- 50% for input/output
+	code_width_percent = 0.8, -- 80% width for code
+	io_height_percent = 0.5, -- 50% height for input panel
 	input_filename = "input.txt",
 	output_filename = "output.txt",
-	compile_command = "g++ % -o %< && ./%< < {input} > {output}",
+	compile_command = "g++ -std=c++17 -Wall % -o %< && ./%< < %s > %s",
 }
 
 function M.setup(user_config)
@@ -17,43 +17,42 @@ function M.setup(user_config)
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "cpp",
 		callback = function()
+			-- Only setup for normal C++ buffers
 			if vim.bo.buftype ~= "" or vim.bo.filetype ~= "cpp" then
 				return
 			end
 
-			local width = vim.o.columns
-			local height = vim.o.lines
-			local code_width = math.floor(width * config.code_width_percent)
-			local io_width = width - code_width
-
-			-- Save current window (C++ file)
+			-- Save current window and buffer (cpp file)
 			local cpp_win = vim.api.nvim_get_current_win()
+			local cpp_buf = vim.api.nvim_win_get_buf(cpp_win)
 
-			-- Create vertical split for IO panel
+			-- Create vertical split for IO panel (right side)
 			vim.cmd("vsplit")
 			local io_win = vim.api.nvim_get_current_win()
+			local io_width = math.floor(vim.o.columns * (1 - config.code_width_percent))
 			vim.api.nvim_win_set_width(io_win, io_width)
 
-			-- Open input.txt in IO panel (no extra split)
+			-- Open input.txt in top half (no new split)
 			vim.cmd("edit " .. config.input_filename)
 			local input_win = vim.api.nvim_get_current_win()
 			local input_buf = vim.api.nvim_win_get_buf(input_win)
 
-			-- Split for output.txt (creates horizontal split)
+			-- Create split for output.txt in bottom half
 			vim.cmd("split " .. config.output_filename)
 			local output_win = vim.api.nvim_get_current_win()
 			local output_buf = vim.api.nvim_win_get_buf(output_win)
 
-			-- Resize IO panel (50% height for input, 50% for output)
-			local io_height = math.floor(height * config.io_height_percent)
-			vim.api.nvim_win_set_height(input_win, io_height / 2)
-			vim.api.nvim_win_set_height(output_win, io_height / 2)
+			-- Calculate and set window heights
+			local io_height = math.floor(vim.o.lines * config.io_height_percent)
+			local half_height = math.floor(io_height / 2)
+			vim.api.nvim_win_set_height(input_win, half_height)
+			vim.api.nvim_win_set_height(output_win, half_height)
 
 			-- Set filetypes
 			vim.api.nvim_buf_set_option(input_buf, "filetype", "text")
 			vim.api.nvim_buf_set_option(output_buf, "filetype", "text")
 
-			-- Return to code window
+			-- Return focus to code window
 			vim.api.nvim_set_current_win(cpp_win)
 		end,
 	})
@@ -63,21 +62,30 @@ function M.setup(user_config)
 		pattern = "cpp",
 		callback = function()
 			vim.keymap.set("n", "<F5>", function()
-				local input_file = config.input_filename
-				local output_file = config.output_filename
+				-- Get absolute file paths
+				local cpp_file = vim.fn.expand("%:p")
+				local input_file = vim.fn.expand(config.input_filename .. ":p")
+				local output_file = vim.fn.expand(config.output_filename .. ":p")
 
-				-- Replace placeholders
+				-- Build command with proper substitutions
 				local cmd = config
 					.compile_command
-					:gsub("%%", vim.fn.expand("%")) -- Current file
-					:gsub("%%<", vim.fn.expand("%:r")) -- File without extension
-					:gsub("{input}", input_file) -- Input file
-					:gsub("{output}", output_file) -- Output file
+					:gsub("%%", cpp_file)
+					:gsub("%%<", vim.fn.expand("%:r"))
+					:gsub("%%s", input_file, 1) -- First replacement for input
+					:gsub("%%s", output_file) -- Second replacement for output
 
 				-- Save all files
-				vim.cmd("w")
-				vim.cmd("silent !" .. cmd) -- Run command
-				vim.cmd("e " .. output_file) -- Refresh output
+				vim.cmd("wa")
+
+				-- Execute compilation and redirect output
+				vim.cmd("silent !" .. cmd)
+
+				-- Refresh output file
+				vim.cmd("e " .. output_file)
+
+				-- Return to code window
+				vim.cmd("wincmd h")
 			end, { buffer = true })
 		end,
 	})
