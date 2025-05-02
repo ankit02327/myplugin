@@ -23,6 +23,7 @@ function M.setup(user_configuration)
 			local actual_screen_height = vim.o.lines
 			local code_width = math.floor(actual_screen_width * configuration.code_width_percentage)
 			local input_width = actual_screen_width - code_width
+			local output_width = math.floor(actual_screen_height * configuration.output_height_percentage)
 
 			local cpp_window_id = vim.api.nvim_get_current_win()
 
@@ -31,6 +32,14 @@ function M.setup(user_configuration)
 				vim.cmd("vsplit " .. configuration.input_file)
 				local input_window_id = vim.api.nvim_get_current_win()
 				vim.api.nvim_win_set_width(input_window_id, input_width)
+			end
+
+			local output_buf = vim.fn.bufnr(configuration.output_file)
+			if output_buf == -1 then
+				-- If output.txt isn't open,/output create the horizontal split
+				vim.cmd("split " .. configuration.output_file)
+				local output_window_id = vim.api.nvim_get_current_win()
+				vim.api.nvim_win_set_height(output_window_id, output_width)
 			end
 		end,
 	})
