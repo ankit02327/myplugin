@@ -6,7 +6,7 @@ local default_configuration = {
 	output_height_percentage = 0.5,
 	input_file = "input.txt",
 	output_file = "output.txt",
-	compile_command = "g++ % -o %< && ./%< < {input} > {output}",
+	compile_command = "g++ % -o %< && %< < {input} > {output}",
 }
 
 function M.setup(user_configuration)
