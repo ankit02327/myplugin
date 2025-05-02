@@ -32,6 +32,7 @@ function M.setup(user_configuration)
 				vim.cmd("silent! vsplit " .. configuration.input_file)
 				local input_window_id = vim.api.nvim_get_current_win()
 				vim.api.nvim_win_set_width(input_window_id, input_width)
+				vim.cmd("silent w")
 			end
 
 			local output_buf = vim.fn.bufnr(configuration.output_file)
@@ -39,6 +40,7 @@ function M.setup(user_configuration)
 				-- If output.txt isn't open,/output create the horizontal split
 				vim.cmd("silent! split " .. configuration.output_file)
 				local output_window_id = vim.api.nvim_get_current_win()
+				vim.cmd("silent w")
 			end
 
 			vim.api.nvim_set_current_win(cpp_window_id)
