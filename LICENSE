@@ -1,19 +1,21 @@
-### Fixed `LICENSE`
-Make sure to replace "YOUR NAME" with your actual name or GitHub username.
+MIT License
 
-## Key Improvements
+Copyright (c) 2025 Ankit (github.com/ankit02327)
 
-1. **Better Autocmd**: Changed from `BufReadPost` to `FileType` which is more reliable for this use case.
-2. **Configurable Options**: Added customizable window sizes and filenames.
-3. **Error Prevention**: Added checks for buffer types to avoid issues in special buffers.
-4. **Proper Window Management**: More robust window handling using Neovim API.
-5. **Automatic Setup**: The plugin now works immediately when required.
-6. **Complete Documentation**: README now explains all features and configuration options.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-To test the plugin:
-1. Make these changes to your files
-2. Commit and push to GitHub
-3. Install in Neovim using your plugin manager
-4. Open a .cpp file to see the layout automatically created
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-The plugin should now work reliably when opening C++ files, creating a three-pane layout with your code, input, and output buffers.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
