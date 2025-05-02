@@ -29,7 +29,7 @@ function M.setup(user_configuration)
 
 			local input_buf = vim.fn.bufnr(configuration.input_file)
 			if input_buf == -1 then
-				vim.cmd("vsplit " .. configuration.input_file)
+				vim.cmd("silent! vsplit " .. configuration.input_file)
 				local input_window_id = vim.api.nvim_get_current_win()
 				vim.api.nvim_win_set_width(input_window_id, input_width)
 			end
@@ -37,7 +37,7 @@ function M.setup(user_configuration)
 			local output_buf = vim.fn.bufnr(configuration.output_file)
 			if output_buf == -1 then
 				-- If output.txt isn't open,/output create the horizontal split
-				vim.cmd("split " .. configuration.output_file)
+				vim.cmd("silent! split " .. configuration.output_file)
 				local output_window_id = vim.api.nvim_get_current_win()
 			end
 
@@ -57,20 +57,12 @@ function M.setup(user_configuration)
 
 				local cmd = configuration.compile_command
 
-				-- Debugging output
-				print("Compiling file: " .. file)
-				print("Input file: " .. input)
-				print("Output file: " .. output)
-
 				cmd = cmd:gsub("%%<", file_no_ext)
 				cmd = cmd:gsub("%%", file)
 				cmd = cmd:gsub("{input}", input)
 				cmd = cmd:gsub("{output}", output)
 
 				vim.cmd("wa")
-
-				-- Debugging output
-				print("Running command: " .. cmd)
 
 				vim.cmd("silent !" .. cmd)
 
