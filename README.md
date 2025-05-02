@@ -65,10 +65,8 @@ require('neovim-cpp-runner').setup({
   output_file = "output.txt",
 
   -- Compilation options
-  compile_command = "g++ -std=c++17 -Wall % -o %< && %< < {input} > {output}",
+  compile_command = "g++ % -o %< && %< < {input} > {output}",
 
-  -- Key mappings
-  run_key = "<F5>",        -- Key to compile and run
 })
 ```
 
