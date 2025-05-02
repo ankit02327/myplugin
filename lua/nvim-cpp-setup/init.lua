@@ -1,30 +1,16 @@
 local M = {}
 
-local default_config = {
-	-- Pixel-perfect layout configuration
-	layout = {
-		code = {
-			width_percent = 0.8, -- 80% width
-			height_percent = 1.0, -- Full height
-			row = 0, -- Top edge
-			col = 0, -- Left edge
-		},
-		io_panel = {
-			width_percent = 0.2, -- 20% width
-			height_percent = 0.2, -- 20% total height (10% input + 10% output)
-			row = 0, -- Top edge
-			col = 0.8, -- Starts at 80% from left
-		},
-	},
-	filenames = {
-		input = "input.txt",
-		output = "output.txt",
-	},
-	compile_command = "g++ -std=c++17 -Wall % -o %< && ./%< < {input} > {output}",
+local default_configuration = {
+	code_width_percentage = 0.8,
+	input_height_percentage = 0.5,
+	output_height_percentage = 0.5,
+	input_file = "input.txt",
+	output_file = "output.txt",
+	compile_command = "g++ % -o %< && ./%< < {input} > {output}",
 }
 
-function M.setup(user_config)
-	local config = vim.tbl_deep_extend("force", default_config, user_config or {})
+function M.setup(user_configuration)
+	local configuration = vim.tbl_deep_extend("force", default_configuration, user_configuration or {})
 
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "cpp",
@@ -33,80 +19,17 @@ function M.setup(user_config)
 				return
 			end
 
-			local screen_width = vim.o.columns
-			local screen_height = vim.o.lines
+			local actual_screen_width = vim.o.columns
+			local actual_screen_height = vim.o.lines
+			local code_width = math.floor(actual_screen_width * configuration.code_width_percentage)
+			local input_width = actual_screen_width - code_width
+			local output_width = actual_screen_width - code_width
 
-			-- Calculate dimensions
-			local code_width = math.floor(screen_width * config.layout.code.width_percent)
-			local io_width = math.floor(screen_width * config.layout.io_panel.width_percent)
-			local io_height = math.floor(screen_height * config.layout.io_panel.height_percent)
-			local io_col = code_width
+			local cpp_window_id = vim.api.nvim_get_current_win()
 
-			-- Main code window (left 80%)
-			local code_win = vim.api.nvim_get_current_win()
-			vim.api.nvim_win_set_config(code_win, {
-				relative = "editor",
-				width = code_width,
-				height = screen_height,
-				row = 0,
-				col = 0,
-				focusable = true,
-			})
-
-			-- Input window (top half of IO panel)
-			vim.cmd("vnew") -- Open a new vertical split to the right
-			local input_win = vim.api.nvim_get_current_win()
-			vim.cmd("edit " .. config.filenames.input)
-			vim.api.nvim_win_set_config(input_win, {
-				relative = "editor",
-				width = io_width,
-				height = math.floor(io_height / 2),
-				row = 0,
-				col = io_col,
-				focusable = true,
-			})
-			vim.api.nvim_buf_set_option(vim.api.nvim_win_get_buf(input_win), "filetype", "text")
-
-			-- Output window (bottom half of IO panel)
-			vim.cmd("s") -- Open a new horizontal split below the current window (input)
-			local output_win = vim.api.nvim_get_current_win()
-			vim.cmd("edit " .. config.filenames.output)
-			vim.api.nvim_win_set_config(output_win, {
-				relative = "editor",
-				width = io_width,
-				height = math.floor(io_height / 2),
-				row = math.floor(io_height / 2),
-				col = io_col,
-				focusable = true,
-			})
-			vim.api.nvim_buf_set_option(vim.api.nvim_win_get_buf(output_win), "filetype", "text")
-
-			-- Return focus to code window
-			vim.api.nvim_set_current_win(code_win)
-		end,
-	})
-
-	-- F5 Compilation keybinding (unchanged)
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "cpp",
-		callback = function()
-			vim.keymap.set("n", "<F5>", function()
-				local input_path = vim.fn.expand(config.filenames.input .. ":p")
-				local output_path = vim.fn.expand(config.filenames.output .. ":p")
-				local cmd = config.compile_command
-					:gsub("%%", vim.fn.expand("%:p"))
-					:gsub("%%<", vim.fn.expand("%:r"))
-					:gsub("{input}", input_path)
-					:gsub("{output}", output_path)
-
-				vim.cmd("wa")
-				local success, _ = pcall(vim.cmd, "silent !" .. cmd)
-				if not success then
-					vim.notify("Compilation failed!", vim.log.levels.ERROR)
-				end
-				vim.cmd("e " .. output_path)
-				vim.cmd("wincmd h")
-			end, { buffer = true })
+			vim.cmd("vsplit " .. configuration.input_file)
+			local input_window_id = vim.api.nvim_get_current_win()
+			vim.api.nvim_win_set_width(input_window_id, input_width)
 		end,
 	})
 end
