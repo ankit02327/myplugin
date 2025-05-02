@@ -4,8 +4,8 @@ local default_configuration = {
 	code_width_percentage = 0.8,
 	input_height_percentage = 0.5,
 	output_height_percentage = 0.5,
-	input_file = "input.txt",
-	output_file = "output.txt",
+	input_file = vim.fn.expand("input.txt:p"),
+	output_file = vim.fn.expand("output.txt:p"),
 	compile_command = "g++ % -o %< && ./%< < {input} > {output}",
 }
 
@@ -54,14 +54,17 @@ function M.setup(user_configuration)
 				local input = configuration.input_file
 				local output = configuration.output_file
 				local cmd = configuration.compile_command
+
 				cmd = cmd:gsub("%%", file)
 				cmd = cmd:gsub("%%<", vim.fn.expand("%:r"))
 				cmd = cmd:gsub("{input}", input)
 				cmd = cmd:gsub("{output}", output)
 
-				vim.cmd("w") -- Save file
+				vim.cmd("wa")
+
 				vim.cmd("silent !" .. cmd)
-				vim.cmd("checktime " .. output) -- Reload output file
+
+				vim.cmd("checktime " .. output)
 			end, { buffer = true })
 		end,
 	})
