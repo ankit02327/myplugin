@@ -40,6 +40,8 @@ function M.setup(user_configuration)
 				vim.cmd("split " .. configuration.output_file)
 				local output_window_id = vim.api.nvim_get_current_win()
 			end
+
+			vim.api.nvim_set_current_win(cpp_window_id)
 		end,
 	})
 end
