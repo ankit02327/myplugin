@@ -48,6 +48,10 @@ lua require('neovim-cpp-runner').setup()
    - Compile your code
    - Run with the provided input
    - Display output in `output.txt` (bottom panel)
+4. Type the following to exit at once:
+   ```sh
+   :qa
+   ```
 
 ## ⚙️ Configuration
 
