@@ -66,7 +66,7 @@ function M.setup(user_configuration)
 
 				vim.cmd("silent !" .. cmd)
 
-				vim.cmd("checktime " .. output)
+				vim.cmd("silent! checktime " .. output)
 			end, { buffer = true })
 		end,
 	})
