@@ -50,9 +50,11 @@ function M.setup(user_configuration)
 		pattern = "cpp",
 		callback = function()
 			vim.keymap.set("n", "<F5>", function()
-				local file = vim.fn.expand("%")
-				local input = vim.fn.expand(configuration.input_file .. ":p")
-				local output = vim.fn.expand(configuration.output_file .. ":p")
+				local file = vim.fn.expand("%:p")
+				local file_no_ext = vim.fn.expand("%:p:r")
+				local input = vim.fn.expand(configuration.input_file)
+				local output = vim.fn.expand(configuration.output_file)
+
 				local cmd = configuration.compile_command
 
 				-- Debugging output
@@ -60,8 +62,8 @@ function M.setup(user_configuration)
 				print("Input file: " .. input)
 				print("Output file: " .. output)
 
+				cmd = cmd:gsub("%%<", file_no_ext)
 				cmd = cmd:gsub("%%", file)
-				cmd = cmd:gsub("%%<", vim.fn.expand("%:r"))
 				cmd = cmd:gsub("{input}", input)
 				cmd = cmd:gsub("{output}", output)
 
