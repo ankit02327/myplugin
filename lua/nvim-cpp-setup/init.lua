@@ -39,7 +39,6 @@ function M.setup(user_configuration)
 				-- If output.txt isn't open,/output create the horizontal split
 				vim.cmd("split " .. configuration.output_file)
 				local output_window_id = vim.api.nvim_get_current_win()
-				vim.api.nvim_win_set_height(output_window_id, output_width)
 			end
 		end,
 	})
