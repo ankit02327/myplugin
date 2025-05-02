@@ -15,30 +15,22 @@ function M.setup(user_configuration)
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = "cpp",
 		callback = function()
-			-- Ensure we are working on a cpp file
 			if vim.bo.buftype ~= "" or vim.bo.filetype ~= "cpp" then
 				return
 			end
 
-			-- Get screen dimensions
 			local actual_screen_width = vim.o.columns
 			local actual_screen_height = vim.o.lines
 			local code_width = math.floor(actual_screen_width * configuration.code_width_percentage)
 			local input_width = actual_screen_width - code_width
 
-			-- Save current window (cpp file)
 			local cpp_window_id = vim.api.nvim_get_current_win()
 
-			-- Check if input.txt is already open in a split, avoid creating multiple splits
 			local input_buf = vim.fn.bufnr(configuration.input_file)
 			if input_buf == -1 then
-				-- If input.txt isn't open, create the split
 				vim.cmd("vsplit " .. configuration.input_file)
 				local input_window_id = vim.api.nvim_get_current_win()
 				vim.api.nvim_win_set_width(input_window_id, input_width)
-			else
-				-- If input.txt is already open, just focus on the window
-				vim.api.nvim_set_current_win(cpp_window_id)
 			end
 		end,
 	})
