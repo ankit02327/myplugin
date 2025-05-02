@@ -4,8 +4,8 @@ local default_configuration = {
 	code_width_percentage = 0.8,
 	input_height_percentage = 0.5,
 	output_height_percentage = 0.5,
-	input_file = vim.fn.expand("input.txt:p"),
-	output_file = vim.fn.expand("output.txt:p"),
+	input_file = "input.txt",
+	output_file = "output.txt",
 	compile_command = "g++ % -o %< && ./%< < {input} > {output}",
 }
 
@@ -51,9 +51,14 @@ function M.setup(user_configuration)
 		callback = function()
 			vim.keymap.set("n", "<F5>", function()
 				local file = vim.fn.expand("%")
-				local input = configuration.input_file
-				local output = configuration.output_file
+				local input = vim.fn.expand(configuration.input_file .. ":p")
+				local output = vim.fn.expand(configuration.output_file .. ":p")
 				local cmd = configuration.compile_command
+
+				-- Debugging output
+				print("Compiling file: " .. file)
+				print("Input file: " .. input)
+				print("Output file: " .. output)
 
 				cmd = cmd:gsub("%%", file)
 				cmd = cmd:gsub("%%<", vim.fn.expand("%:r"))
@@ -61,6 +66,9 @@ function M.setup(user_configuration)
 				cmd = cmd:gsub("{output}", output)
 
 				vim.cmd("wa")
+
+				-- Debugging output
+				print("Running command: " .. cmd)
 
 				vim.cmd("silent !" .. cmd)
 
