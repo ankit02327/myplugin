@@ -44,6 +44,27 @@ function M.setup(user_configuration)
 			vim.api.nvim_set_current_win(cpp_window_id)
 		end,
 	})
+
+	-- Set up F5 keybinding for compiling
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = "cpp",
+		callback = function()
+			vim.keymap.set("n", "<F5>", function()
+				local file = vim.fn.expand("%")
+				local input = configuration.input_file
+				local output = configuration.output_file
+				local cmd = configuration.compile_command
+				cmd = cmd:gsub("%%", file)
+				cmd = cmd:gsub("%%<", vim.fn.expand("%:r"))
+				cmd = cmd:gsub("{input}", input)
+				cmd = cmd:gsub("{output}", output)
+
+				vim.cmd("w") -- Save file
+				vim.cmd("silent !" .. cmd)
+				vim.cmd("checktime " .. output) -- Reload output file
+			end, { buffer = true })
+		end,
+	})
 end
 
 return M
