@@ -1,3 +1,8 @@
+<img width="1893" height="966" alt="image" src="https://github.com/user-attachments/assets/d80b7b2d-bffc-4398-9780-359280c78109" />
+
+<img width="1890" height="954" alt="image" src="https://github.com/user-attachments/assets/3d83a78e-5313-4abd-b0d5-9ce2022f54b2" />
+
+
 # C++ Runner for Neovim 🚀
 
 A powerful Neovim plugin that lets you compile and run C++ code with a single keypress, featuring dedicated input/output panes for a seamless development experience.
